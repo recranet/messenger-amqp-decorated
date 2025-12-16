@@ -43,8 +43,21 @@ You lose error details history in the message headers, but the messages continue
 
 ## Installation
 
-The factory uses Symfony's `#[AsDecorator]` attribute to automatically wrap the AMQP transport factory. Just include the classes and they will be auto-configured.
+```bash
+composer require recranet/messenger-amqp-decorated
+```
+
+If you're using Symfony Flex, the bundle is registered automatically.
+
+Otherwise, add it to `config/bundles.php`:
+
+```php
+return [
+    // ...
+    Recranet\MessengerAmqpDecorated\MessengerAmqpDecoratedBundle::class => ['all' => true],
+];
+```
 
 ## Usage
 
-No configuration needed. The decorator automatically wraps all AMQP transports.
+No configuration needed. The bundle automatically decorates `messenger.transport.amqp.factory`, wrapping all AMQP transports.
