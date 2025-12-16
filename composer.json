@@ -1,0 +1,16 @@
+{
+    "name": "recranet/messenger-amqp-decorated",
+    "description": "Transport decorator that removes ErrorDetailsStamp before sending messages to AMQP",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Recranet\\MessengerAmqpDecorated\\": "src/"
+        }
+    },
+    "require": {
+        "php": ">=8.2",
+        "symfony/messenger": "^7.0",
+        "symfony/dependency-injection": "^7.0"
+    }
+}
