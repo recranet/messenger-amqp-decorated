@@ -2,8 +2,6 @@
 
 namespace Recranet\MessengerAmqpDecorated;
 
-use Symfony\Component\DependencyInjection\Attribute\AsDecorator;
-use Symfony\Component\DependencyInjection\Attribute\AutowireDecorated;
 use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
 use Symfony\Component\Messenger\Transport\TransportFactoryInterface;
 use Symfony\Component\Messenger\Transport\TransportInterface;
@@ -13,14 +11,12 @@ use Symfony\Component\Messenger\Transport\TransportInterface;
  *
  * @implements TransportFactoryInterface<TransportInterface>
  */
-#[AsDecorator(decorates: 'messenger.transport.amqp.factory')]
 final class MessengerAmqpDecoratedTransportFactory implements TransportFactoryInterface
 {
     /**
      * @param TransportFactoryInterface<TransportInterface> $inner
      */
     public function __construct(
-        #[AutowireDecorated]
         private TransportFactoryInterface $inner,
     ) {
     }
