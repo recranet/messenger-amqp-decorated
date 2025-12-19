@@ -3,8 +3,6 @@
 namespace Recranet\MessengerAmqpDecorated;
 
 use Symfony\Component\Messenger\Envelope;
-use Symfony\Component\Messenger\Exception\MessageDecodingFailedException;
-use Symfony\Component\Messenger\Exception\TransportException;
 use Symfony\Component\Messenger\Stamp\ErrorDetailsStamp;
 use Symfony\Component\Messenger\Transport\CloseableTransportInterface;
 use Symfony\Component\Messenger\Transport\Receiver\MessageCountAwareInterface;
@@ -13,13 +11,9 @@ use Symfony\Component\Messenger\Transport\SetupableTransportInterface;
 use Symfony\Component\Messenger\Transport\TransportInterface;
 
 /**
- * Resilient AMQP transport decorator that handles common AMQP failures gracefully.
- *
- * This decorator provides two resilience mechanisms:
- * 1. Removes ErrorDetailsStamp before sending to prevent "table too large for buffer"
- *    errors caused by stacktraces accumulating on message retries.
- * 2. Catches AMQPException during message retrieval to prevent worker crashes
- *    from corrupted "invalid AMQP data" in the queue.
+ * AMQP transport decorator that removes ErrorDetailsStamp before sending
+ * to prevent "table too large for buffer" errors caused by stacktraces
+ * accumulating on message retries.
  */
 final class MessengerAmqpDecoratedTransport implements TransportInterface, QueueReceiverInterface, SetupableTransportInterface, CloseableTransportInterface, MessageCountAwareInterface
 {
@@ -30,14 +24,7 @@ final class MessengerAmqpDecoratedTransport implements TransportInterface, Queue
 
     public function get(): iterable
     {
-        try {
-            foreach ($this->inner->get() as $envelope) {
-                yield $envelope;
-            }
-        } catch (\AMQPException|TransportException|MessageDecodingFailedException) {
-            // Stop iteration to skip corrupted message and prevent worker crash loop.
-            // The problematic message may need manual purging from the queue.
-        }
+        return $this->inner->get();
     }
 
     /**
@@ -49,14 +36,7 @@ final class MessengerAmqpDecoratedTransport implements TransportInterface, Queue
             throw new \LogicException(sprintf('The inner transport "%s" does not implement "%s".', $this->inner::class, QueueReceiverInterface::class));
         }
 
-        try {
-            foreach ($this->inner->getFromQueues($queueNames) as $envelope) {
-                yield $envelope;
-            }
-        } catch (\AMQPException|TransportException|MessageDecodingFailedException) {
-            // Stop iteration to skip corrupted message and prevent worker crash loop.
-            // The problematic message may need manual purging from the queue.
-        }
+        return $this->inner->getFromQueues($queueNames);
     }
 
     public function ack(Envelope $envelope): void
