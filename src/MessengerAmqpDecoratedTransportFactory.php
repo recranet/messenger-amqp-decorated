@@ -7,7 +7,10 @@ use Symfony\Component\Messenger\Transport\TransportFactoryInterface;
 use Symfony\Component\Messenger\Transport\TransportInterface;
 
 /**
- * Factory that wraps AMQP transports with RemoveErrorDetailsStampTransport.
+ * Factory decorator that wraps AMQP transports with MessengerAmqpDecoratedTransport.
+ *
+ * Decorates the default AMQP transport factory to add resilience against
+ * common AMQP failures like corrupted messages and oversized headers.
  *
  * @implements TransportFactoryInterface<TransportInterface>
  */
