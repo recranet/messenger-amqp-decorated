@@ -4,6 +4,7 @@ namespace Recranet\MessengerAmqpDecorated;
 
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\Stamp\ErrorDetailsStamp;
+use Symfony\Component\Messenger\Stamp\RedeliveryStamp;
 use Symfony\Component\Messenger\Transport\CloseableTransportInterface;
 use Symfony\Component\Messenger\Transport\Receiver\MessageCountAwareInterface;
 use Symfony\Component\Messenger\Transport\Receiver\QueueReceiverInterface;
@@ -11,9 +12,9 @@ use Symfony\Component\Messenger\Transport\SetupableTransportInterface;
 use Symfony\Component\Messenger\Transport\TransportInterface;
 
 /**
- * AMQP transport decorator that removes ErrorDetailsStamp before sending
- * to prevent "table too large for buffer" errors caused by stacktraces
- * accumulating on message retries.
+ * AMQP transport decorator that removes ErrorDetailsStamp and RedeliveryStamp
+ * before sending to prevent "table too large for buffer" errors caused by
+ * stacktraces accumulating on message retries.
  */
 final class MessengerAmqpDecoratedTransport implements TransportInterface, QueueReceiverInterface, SetupableTransportInterface, CloseableTransportInterface, MessageCountAwareInterface
 {
@@ -51,7 +52,11 @@ final class MessengerAmqpDecoratedTransport implements TransportInterface, Queue
 
     public function send(Envelope $envelope): Envelope
     {
-        return $this->inner->send($envelope->withoutAll(ErrorDetailsStamp::class));
+        return $this->inner->send(
+            $envelope
+                ->withoutAll(ErrorDetailsStamp::class)
+                ->withoutAll(RedeliveryStamp::class)
+        );
     }
 
     public function setup(): void
